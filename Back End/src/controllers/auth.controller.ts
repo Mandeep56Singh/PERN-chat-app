@@ -1,7 +1,7 @@
 import bcryptjs from "bcryptjs";
-import { error } from "console";
 import { Request, Response } from "express";
 import prisma from "../db/prisma";
+import { generateToken } from "../utils/generateToken";
 export const signup = async (req: Request, res: Response) => {
   try {
     const { fullName, username, password, confirmPassword, gender } = req.body;
@@ -19,7 +19,7 @@ export const signup = async (req: Request, res: Response) => {
     });
 
     if (user) {
-      return res.send(400).json({ error: "Username already exists" });
+      return res.status(400).json({ error: "Username already exists" });
     }
 
     // Hashing the password
@@ -40,7 +40,7 @@ export const signup = async (req: Request, res: Response) => {
 
     if (newUser) {
       // generate new token in a sec
-
+      generateToken(newUser.id,res)
       res.status(201).json({
         id: newUser.id,
         fullName: newUser.username,
