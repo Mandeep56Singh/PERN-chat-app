@@ -59,26 +59,38 @@ export const login = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const user = await prisma.user.findUnique({ where: { username } });
 
-    if(!user) {
-      return res.status(400).json({error:"User doesn't exist"})
+    if (!user) {
+      return res.status(400).json({ error: "User doesn't exist" });
     }
-    const isPasswordCorrect = await bcryptjs.compare(password,user.password)
+    const isPasswordCorrect = await bcryptjs.compare(password, user.password);
 
-    if(!isPasswordCorrect) {
-      return res.status(400).json({error:"Password incorrect"})
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ error: "Password incorrect" });
     }
 
     // now user credentials are checked and are correct. Generate a token for the user
-    generateToken(user.id,res);
+    generateToken(user.id, res);
 
     res.status(200).json({
       id: user.id,
       fullName: user.fullName,
       username: user.username,
-      profilePic: user.profilePic
-    })
+      profilePic: user.profilePic,
+    });
   } catch (error) {
-    console.log("Error in login controller",error.message)
-    res.status(500).json({error:"Internal Server Error"})
+    console.log("Error in login controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.cookie("accessToken", "", {
+      maxAge: 0,
+    });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.log("Error in logout Controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
