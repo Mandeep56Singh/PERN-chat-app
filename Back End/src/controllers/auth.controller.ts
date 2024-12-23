@@ -1,7 +1,8 @@
 import bcryptjs from "bcryptjs";
 import { Request, Response } from "express";
-import prisma from "../db/prisma";
-import { generateToken } from "../utils/generateToken";
+
+import { generateToken } from "../utils/generateToken.js";
+import prisma from "../db/prisma.js";
 export const signup = async (req: Request, res: Response) => {
   try {
     const { fullName, username, password, confirmPassword, gender } = req.body;
@@ -77,7 +78,7 @@ export const login = async (req: Request, res: Response) => {
       username: user.username,
       profilePic: user.profilePic,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in login controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
@@ -89,7 +90,7 @@ export const logout = async (req: Request, res: Response) => {
       maxAge: 0,
     });
     res.status(200).json({ message: "Logged out successfully" });
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error in logout Controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
