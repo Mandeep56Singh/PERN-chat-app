@@ -96,3 +96,28 @@ export const getMessage = async (req: Request, res: Response): Promise<any> => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+export const getAllMessageSenders = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const me = req.user.id;
+    const users = await prisma.user.findMany({
+      where: {
+        id: {
+          not: me,
+        },
+      },
+      select: {
+        id: true,
+        fullName: true,
+        profilePic: true,
+      },
+    });
+    res.status(200).json(users);
+  } catch (error: any) {
+    console.error("Error in getAllMessageSenders controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
