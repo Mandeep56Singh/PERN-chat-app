@@ -1,9 +1,9 @@
 import bcryptjs from "bcryptjs";
 import { Request, Response } from "express";
 
-import { generateToken } from "../utils/generateToken.js";
 import prisma from "../db/prisma.js";
-export const signup = async (req: Request, res: Response) => {
+import { generateToken } from "../utils/generateToken.js";
+export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     const { fullName, username, password, confirmPassword, gender } = req.body;
 
@@ -55,7 +55,7 @@ export const signup = async (req: Request, res: Response) => {
   }
 };
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { username, password } = req.body;
     const user = await prisma.user.findUnique({ where: { username } });
@@ -92,6 +92,32 @@ export const logout = async (req: Request, res: Response) => {
     res.status(200).json({ message: "Logged out successfully" });
   } catch (error: any) {
     console.log("Error in logout Controller", error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+// Get current user
+export const getCurrentUser = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "user not found" });
+    }
+    res.status(200).json({
+      id: user.id,
+      fullName: user.fullName,
+      username: user.username,
+      profilePic: user.profilePic,
+    });
+  } catch (error: any) {
+    console.log("Error in getCurrentUser Controller", error.message);
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
