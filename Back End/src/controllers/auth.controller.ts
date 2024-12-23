@@ -40,7 +40,7 @@ export const signup = async (req: Request, res: Response) => {
 
     if (newUser) {
       // generate new token in a sec
-      generateToken(newUser.id,res)
+      generateToken(newUser.id, res);
       res.status(201).json({
         id: newUser.id,
         fullName: newUser.username,
@@ -51,5 +51,34 @@ export const signup = async (req: Request, res: Response) => {
     }
   } catch (error: any) {
     console.log("Error in signup", error.message);
+  }
+};
+
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
+    const user = await prisma.user.findUnique({ where: { username } });
+
+    if(!user) {
+      return res.status(400).json({error:"User doesn't exist"})
+    }
+    const isPasswordCorrect = await bcryptjs.compare(password,user.password)
+
+    if(!isPasswordCorrect) {
+      return res.status(400).json({error:"Password incorrect"})
+    }
+
+    // now user credentials are checked and are correct. Generate a token for the user
+    generateToken(user.id,res);
+
+    res.status(200).json({
+      id: user.id,
+      fullName: user.fullName,
+      username: user.username,
+      profilePic: user.profilePic
+    })
+  } catch (error) {
+    console.log("Error in login controller",error.message)
+    res.status(500).json({error:"Internal Server Error"})
   }
 };
